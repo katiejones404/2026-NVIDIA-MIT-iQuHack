@@ -218,8 +218,8 @@ We want to see how you leveraged AI to accelerate your development and, cruciall
 
 You must produce a cohesive story of your project.
 
-* **If In-Person:** A live 5-minute presentation to the judges.
-* **If Remote:** A 5-minute voice-over slide deck (MP4 format).
+* **If In-Person:** A live 5-10 minute presentation to the judges.
+* **If Remote:** A 5-10 minute voice-over slide deck (MP4 format) included in your final submission.
 
 **Example Presentation Agenda:**
 
