@@ -10,8 +10,11 @@ Phase one: Check the tutorial_notebook/ for our phase one files
 To run: Run the "01_quantum_enhanced_optimization_LABS.ipynb" notebook in tutorial_notebook 
 
 Phase two: Code under the teams-submission file
+
 Make sure you have all of the qbraid_requirements.txt downloaded.
+
 To run: open the cpu and gpu-update2.ipynb files and run those notebooks
+
 The testing for GPU was not fully implemented, but the logic is under the testGPU.py file
 
 
