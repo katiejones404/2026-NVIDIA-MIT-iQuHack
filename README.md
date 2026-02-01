@@ -1,5 +1,12 @@
 # NVIDIA iQuHACK 2026 Challenge
 
+##Our Submission:
+Link to Presentation:
+https://docs.google.com/presentation/d/1ZY3MGaIC2rDJtVSstQJYGkgk4eSibpiNmItoFtEnWvY/edit?usp=sharing
+
+##How to Access our Code##
+Phase one: Check the tutorial_notebook/ for our phase one files
+Phase two: Code under the teams-submission file
 ## Overview
 
 The Low Autocorrelation of Binary Sequences (LABS) problem is a notoriously difficult optimization challenge, critical for high-performance radar and telecommunications.
