@@ -25,18 +25,17 @@ Owner: Jiarong Xu
 * #### **Landscape Robustness**
 
 * The LABS problem has a highly rugged energy landscape with many local minima. QITE approximates imaginary-time evolution via McLachlan’s variational principle, suppressing high-energy components of the state and biasing the evolution toward low-energy configurations. This energy-filtering behavior is often more robust on rugged landscapes than purely gradient-based variational methods (McArdle et al., 2019).  
-* 
+  
 
 * #### **Scalability via Matrix Product States**
 
 * Imaginary-time evolution heuristically favors low-energy states with limited entanglement, making tensor-network representations suitable. Using an MPS ansatz allows us to control computational cost via the bond dimension and avoid full state-vector simulation. We leverage CUDA-Q with the cuTensorNet backend to efficiently run MPS contractions on GPU hardware.  
-* 
+  
 
 * #### **Generative Synergy with Classical Optimization**
 
 * Rather than directly targeting the global optimum, we use QITE as a generative heuristic that concentrates probability mass on low-energy configurations. The resulting samples are used to initialize a classical Multi-Trajectory Search (MTS) for efficient local refinement. This hybrid approach combines quantum-inspired global exploration with fast classical optimization.  
-*   
-* 
+  
 
 ### **Literature Review**
 
