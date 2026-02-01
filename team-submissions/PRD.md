@@ -59,7 +59,7 @@ Owner: Jiarong Xu
 
 ## **3\. The Acceleration Strategy**
 
-Owner: Lingjia
+Owner: Lingjia Shi
 
 ### **Quantum Acceleration (CUDA-Q)**
 
@@ -78,7 +78,7 @@ Owner: Lingjia
 
 ## **4\. The Verification Plan**
 
-## Owner: Katie
+Owner: Katie Jones
 
 In the context of the Low Autocorrelation Binary Sequence (LABS) problem and quantum-enhanced optimization, validation is critical for several specific reasons:
 
@@ -115,7 +115,7 @@ We then verified the mathematical symmetries of the LABS problem, confirming tha
 
 ## **5\. Execution Strategy & Success Metrics**
 
-Owner: Emma
+Owner: Emma Wilmott
 
 ### **Agentic Workflow**
 
@@ -172,7 +172,7 @@ Target goals
 
 ## **6\. Resource Management Plan**
 
-Owner: Lingjia
+Owner: Lingjia Shi
 
 * Plan: We follow a strict CPU → L4 → A100 escalation policy. All development and debugging happens on CPU or cheap L4 GPUs. Expensive A100 instances are only used for time-boxed final benchmarks, under direct supervision of the GPU Acceleration PIC, with both automated and manual shutdown safeguards to prevent idle burn.
 
