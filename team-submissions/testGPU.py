@@ -1,18 +1,21 @@
 # testGPU.py
 '''in gpu-update2.ipynb put:
-import testGPU1
+import testGPU
 import importlib
-importlib.reload(testGPU1) # Ensures code changes are picked up
+importlib.reload(testGPU)
 
-# Pass the functions defined in the notebook into the tester
+# Pass the functions from the notebook into the test suite
 testGPU1.run_gpu_comparison_tests(
-    labs_energy_fn=labs_energy_pm1, 
-    optimizer_fn=tabu_search_pm1, 
-    bits_converter_fn=pm1_to_bits01
+    labs_energy_pm1=labs_energy_pm1, 
+    pm1_to_bits01=pm1_to_bits01, 
+    tabu_search_pm1=tabu_search_pm1,
+    mts_quant1=mts_quant1
 )
 
 #This will be added after we successfully find and run data
 '''
+
+# testGPU.py
 import cudaq
 from cudaq import spin
 import numpy as np
@@ -20,122 +23,113 @@ import unittest
 import time
 
 # ---------------------------------------------------------------------
-# SECTION 1: QUANTUM PHYSICS VALIDATION LOGIC
-# This section uses CUDA-Q to build a Hamiltonian that represents
-# the Low Autocorrelation Binary Sequence (LABS) problem.
+# This builds the ground-truth energy model using CUDA-Q.
 # ---------------------------------------------------------------------
 
-def get_labs_hamiltonian(n_qubits):
+def get_verification_hamiltonian(N: int):
     """
-    Creates a Spin Hamiltonian where the ground state (lowest energy)
-    corresponds to the optimal LABS sequence.
+    Constructs the LABS Hamiltonian by squaring the correlation terms.
+    This provides a physical benchmark to test against classical math.
     """
-    hamiltonian = 0.0
-    # The LABS energy is the sum of the squares of correlations at each lag 'k'
-    for k in range(1, n_qubits):
-        correlation_k = 0.0
-        for i in range(n_qubits - k):
-            # spin.z(i) represents the value (+1 or -1) of the i-th bit
-            correlation_k += spin.z(i) * spin.z(i + k)
+    hamiltonian = None
+    for k in range(1, N):
+        term_k = None
+        for i in range(N - k):
+            zz = spin.z(i) * spin.z(i + k)
+            term_k = zz if term_k is None else term_k + zz
         
-        # We square the  correlation operator to match the LABS objective function
-        hamiltonian += correlation_k * correlation_k
+        # The energy is the sum of squared correlations for each lag k
+        term_sq = term_k * term_k
+        hamiltonian = term_sq if hamiltonian is None else hamiltonian + term_sq
     return hamiltonian
 
-def quantum_energy_benchmark(bitstring):
+def quantum_energy_verify(bitstring_01):
     """
-    Calculates the energy of a specific bitstring using a Quantum Simulator.
-    This serves as our 'Source of Truth'.
+    Runs a quantum simulation to measure the energy of a specific state.
     """
-    n = len(bitstring)
-    ham = get_labs_hamiltonian(n)
+    N = len(bitstring_01)
+    ham = get_verification_hamiltonian(N)
     
-    # Define a simple kernel to prepare the state corresponding to the bitstring
     @cudaq.kernel
-    def prepare_state(bits: list[int]):
-        qreg = cudaq.qvector(len(bits))
-        for i, val in enumerate(bits):
-            if val == 1:
-                x(qreg[i]) # Flip to state |1> if the bit is 1
+    def state_prep(bits: list[int]):
+        q = cudaq.qvector(len(bits))
+        for i, b in enumerate(bits):
+            if b == 1:
+                x(q[i])
 
-    # Use the 'nvidia' GPU backend if available, otherwise fallback to 'qpp' (should not need)
-    targets = [t.name for t in cudaq.get_targets()]
-    selected_target = "nvidia" if "nvidia" in targets else "qpp"
-    cudaq.set_target(selected_target)
-
-    # Observe calculates the expectation value <Psi|H|Psi>
-    # For a classical bitstring state, this is  the Ising energy.
-    result = cudaq.observe(prepare_state, ham, bitstring)
+    # Select the high-performance target if available
+    available = [t.name for t in cudaq.get_targets()]
+    if "tensornet" in available:
+        cudaq.set_target("tensornet")
+    elif "nvidia" in available:
+        cudaq.set_target("nvidia")
+    
+    result = cudaq.observe(state_prep, ham, bitstring_01)
     return int(round(result.expectation()))
 
 # ---------------------------------------------------------------------
-# SECTION 2: COMPARISON TEST SUITE
+# SECTION 2: DETAILED VALIDATION SUITE
 # ---------------------------------------------------------------------
 
-def run_gpu_comparison_tests(labs_energy_fn, optimizer_fn, bits_converter_fn):
+def run_gpu_comparison_tests(labs_energy_pm1, pm1_to_bits01, tabu_search_pm1, mts_quant1):
     """
-    A test suite that compares classical results with 
-    quantum-simulated reality.
+    Executes comparison tests to ensure the GPU notebook logic is sound.
     """
 
     class TestGPULABS(unittest.TestCase):
         
-        def test_energy_consistency(self):
+        def test_math_physics_alignment(self):
             """
-            Verification: Does the classical math match the Quantum Hamiltonian?
-            This ensures the logic in the notebook is physically accurate.
+            Ensures the classical energy function matches the quantum benchmark.
             """
-            print("\n[TEST] Verifying Classical vs. Quantum Energy Consistency...")
-            test_n = 8
-            # Generate a random sequence of +1 and -1
-            sequence = np.random.choice([-1, 1], size=test_n)
+            print("\n[CHECK] Verifying Energy Math vs. Quantum Physics...")
+            N_test = 10
+            # Create a random sequence
+            seq = np.random.choice([-1, 1], size=N_test).astype(np.int8)
             
-            # Calculate energy using the notebook function
-            classical_energy = labs_energy_fn(sequence)
+            # Classical calculation
+            e_class = labs_energy_pm1(seq)
             
-            # Convert sequence to 0/1 bits and calculate using CUDA-Q Hamiltonian
-            bits = bits_converter_fn(sequence).tolist()
-            quantum_energy = quantum_energy_benchmark(bits)
+            # Quantum calculation
+            bits = pm1_to_bits01(seq).tolist()
+            e_quant = quantum_energy_verify(bits)
             
-            print(f"  Sequence: {sequence}")
-            print(f"  Classical Math Result: {classical_energy}")
-            print(f"  Quantum Ising Result:   {quantum_energy}")
+            print(f"  Sequence: {seq}")
+            print(f"  Notebook Energy: {e_class}")
+            print(f"  Quantum Verify:  {e_quant}")
             
-            self.assertEqual(classical_energy, quantum_energy, 
-                             "Warning, Classical energy calculation deviates from Quantum physics!")
-            print("  Result: SUCCESS (Math is consistent with physics)")
+            self.assertEqual(e_class, e_quant, "Classical and Quantum energies must match!")
+            print("  Status: Math Alignment Verified")
 
-        def test_optimization_validity(self):
+        def test_hybrid_search_results(self):
             """
-            Verification: Does the optimizer find a 'better' state?
-            Ensures the minimized energy is lower than the starting point.
+            Verifies that the hybrid MTS algorithm returns a valid best state.
             """
-            print("\n[TEST] Verifying Optimizer Energy Minimization...")
-            test_n = 12
-            initial_seq = np.random.choice([-1, 1], size=test_n)
-            e_start = labs_energy_fn(initial_seq)
+            print("\n[CHECK] Verifying Hybrid MTS Optimizer Output...")
+            N_test = 12
             
-            start_time = time.time()
-            # Run the MTS/Tabu optimizer from the notebook
-            best_seq, e_final = optimizer_fn(initial_seq, max_iters=50)
-            end_time = time.time()
+            start = time.time()
+            # Run a small version of the hybrid search
+            res = mts_quant1(N=N_test, mts_iters=50, pop_size=10, tabu_iters=50)
+            duration = time.time() - start
             
-            print(f"  Initial Energy: {e_start}")
-            print(f"  Minimized Energy: {e_final}")
-            print(f"  Execution Time: {end_time - start_time:.4f}s")
+            best_e = res["best_E"]
+            best_s_01 = res["best_s_01"]
             
-            self.assertLessEqual(e_final, e_start, "Optimizer failed to find a lower or equal energy state.")
+            # Cross-check the best energy found with the quantum benchmark
+            e_verify = quantum_energy_verify(best_s_01.tolist())
             
-            # Final sanity check: Verify the final state with the Quantum benchmark
-            final_bits = bits_converter_fn(best_seq).tolist()
-            e_verify = quantum_energy_benchmark(final_bits)
-            self.assertEqual(e_final, e_verify, "Optimized state energy is inconsistent when cross-checked.")
+            print(f"  Best Energy Found: {best_e}")
+            print(f"  Quantum Validation: {e_verify}")
+            print(f"  Search Duration:    {duration:.3f}s")
             
-            print("  Result: SUCCESS (Optimizer reduced energy correctly)")
+            self.assertEqual(best_e, e_verify, "Reported best energy does not match reality!")
+            print("  Status: Hybrid Results Validated")
 
-    # Launch the tests
+    # Runner configuration
+    print("\n" + "="*60)
+    print("      NVIDIA iQuHACK 2026: UPDATED GPU VALIDATION")
     print("="*60)
-    print("      NVIDIA iQuHACK 2026: GPU VALIDATION STARTING")
-    print("="*60)
+    
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGPULABS)
     unittest.TextTestRunner(verbosity=1).run(suite)
