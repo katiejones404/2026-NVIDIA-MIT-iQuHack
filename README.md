@@ -1,12 +1,19 @@
 # NVIDIA iQuHACK 2026 Challenge
 
-##Our Submission:
+## Our Submission:
 Link to Presentation:
 https://docs.google.com/presentation/d/1ZY3MGaIC2rDJtVSstQJYGkgk4eSibpiNmItoFtEnWvY/edit?usp=sharing
 
-##How to Access our Code##
+## How to Access our Code##
 Phase one: Check the tutorial_notebook/ for our phase one files
+
+To run: Run the "01_quantum_enhanced_optimization_LABS.ipynb" notebook in tutorial_notebook 
+
 Phase two: Code under the teams-submission file
+Make sure you have all of the qbraid_requirements.txt downloaded.
+To run: open the cpu and gpu-update2.ipynb files and run those notebooks
+
+
 ## Overview
 
 The Low Autocorrelation of Binary Sequences (LABS) problem is a notoriously difficult optimization challenge, critical for high-performance radar and telecommunications.
