@@ -34,7 +34,7 @@ Owner: Jiarong Xu
 
 * #### **Generative Synergy with Classical Optimization**
 
-* Rather than directly targeting the global optimum, we use QITE as a generative heuristic that concentrates probability mass on low-energy configurations. The resulting samples are used to initialize a classical Multi-Trajectory Search (MTS) for efficient local refinement. This hybrid approach combines quantum-inspired global exploration with fast classical optimization.  
+* Rather than directly targeting the global optimum, we use QITE as a generative heuristic that concentrates probability mass on low-energy configurations. The resulting samples are used to initialize a classical MTS for efficient local refinement. This hybrid approach combines quantum-inspired global exploration with fast classical optimization.  
   
 
 ### **Literature Review**
