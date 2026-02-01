@@ -71,6 +71,7 @@ We built a Quantum Ising model-based unit test to rigorously verify physical acc
 
 # Vibe Log
 
+| | |
 | :---- | :---- |
 | Wins | Gemini quickly matched our intended algorithms and steps to Cuda-Q packages/kernels. Claude and Gemini were surprisingly helpful at pointing us to real research papers involving QITE, ITE, MPS, and Tensor Networks. |
 | Fails | While discussing strategy with ChatGPT, we switched from full names of algorithms to acronyms and abbreviations. It ended up describing and giving us code to implement Multi-Trajectory Search (MTS) instead of Mimetic-Tabu Search (MTS), and didn’t clarify or seem to notice the difference.  ChatGPT liked to make up colloquialisms or coin terms without explaining that it was making up something new. We couldn’t find any papers about “Quantum Superposition Bias” because it didn’t exist. When we asked Gemini to explain QBS, it started explaining something slightly different … that also didn’t quite exist.  |
